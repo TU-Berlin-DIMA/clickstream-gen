@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<generator_prototype xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.dima.tu-berlin.de/myriad/prototype">
+
+  <!-- configurable parameters -->
+  <parameters>
+    <!-- naming convention {generator_name}.{parameter_name} -->
+    <parameter key="request.sequence.base_cardinality">1000</parameter>
+  </parameters>
+
+  <!-- function configuration -->
+  <functions>
+    <!-- example: Pr[request.*] -->
+    <function key='Pr[request.pk]' type='uniform_probability[I64u]'>
+      <argument key='x_min' type='I64u' value='1' />
+      <argument key='x_max' type='I64u' value='${%request.sequence.cardinality% + 1}' />
+    </function>
+    <function key='Pr[request.gender]' type='combined_probability[Enum]'>
+      <argument key='path' type='String' value='${%ENV.config-dir% + "/distributions/core/demographics/gender.distribution"}' />
+    </function>
+    <function key='Pr[request.first_name]' type='conditional_combined_probability[Enum;Enum]'>
+      <argument key='path' type='String' value='${%ENV.config-dir% + "/distributions/core/demographics/first_name.distribution"}' />
+    </function>
+    <function key='Pr[request.last_name]' type='combined_probability[Enum]'>
+      <argument key='path' type='String' value='${%ENV.config-dir% + "/distributions/core/demographics/last_name.distribution"}' />
+    </function>
+    <function key='Pr[request.age]' type='normal_probability[Decimal]'>
+      <argument key='mean' type='Decimal' value='48' />
+      <argument key='stddev' type='Decimal' value='12' />
+    </function>
+  </functions>
+
+  <!-- enumeration types -->
+  <enum_sets>
+    <!-- example: demographics.* -->
+    <enum_set key='demographics.gender'>
+      <argument key='path' type='String' value='${%ENV.config-dir% + "/domains/core/demographics/gender.domain"}' />
+    </enum_set>
+    <enum_set key='demographics.first_name'>
+      <argument key='path' type='String' value='${%ENV.config-dir% + "/domains/core/demographics/first_name.domain"}' />
+    </enum_set>
+    <enum_set key='demographics.last_name'>
+      <argument key='path' type='String' value='${%ENV.config-dir% + "/domains/core/demographics/last_name.domain"}' />
+    </enum_set>
+  </enum_sets>
+
+  <record_sequences>
+    <random_sequence key="request">
+      <record_type>
+        <field name='position' type='I32u' />
+        <field name='server' type='String' />
+        <field name='type'  type='Enum' enumref='request.type' />
+        <field name='method' type='Enum' enumref='request.method' />
+        <field name='timestamp' type='Date' />
+        <field name='browseCount' type='I16u' />
+        <field name='productCategory' type='Enum' enumref='product.category' />
+        <field name='productInterval' type='Enum' enumref='product.category' />
+        <reference name='product' type='product' />
+        <reference name='session' type='session' />
+      </record_type>
+      <output_format type="csv">
+        <argument key='delimiter' type='Char' value='|' />
+        <argument key='field' type='field_ref' ref='request:server' />
+        <argument key='field' type='field_ref' ref='request:type' />
+        <argument key='field' type='field_ref' ref='request:method' />
+      </output_format>
+      <!-- 
+      <setter_chain>
+        <setter key='set_pk' type='field_setter'>
+          <argument key='field' type='field_ref' ref='customer:pk' />
+          <argument key='value' type='clustered_value_provider[I64u]'>
+            <argument key='probability' type='function_ref' ref='Pr[request.pk]' />
+            <argument key='cardinality' type='const_range_provider[I64u]'>
+              <argument key='min' type='I64u' value='0' />
+              <argument key='max' type='I64u' value='%request.sequence.cardinality%' />
+            </argument>
+          </argument>
+        </setter>
+        <setter key='set_gender' type='field_setter'>
+          <argument key='field' type='field_ref' ref='customer:gender' />
+          <argument key='value' type='random_value_provider[Enum]'>
+            <argument key='probability' type='function_ref' ref='Pr[request.gender]' />
+          </argument>
+        </setter>
+        <setter key='set_first_name' type='field_setter'>
+          <argument key='field' type='field_ref' ref='customer:first_name' />
+          <argument key='value' type='random_value_provider[Enum]'>
+            <argument key='probability' type='function_ref' ref='Pr[request.first_name]' />
+            <argument key='condition_field' type='field_ref' ref='customer:gender' />
+          </argument>
+        </setter>
+        <setter key='set_last_name' type='field_setter'>
+          <argument key='field' type='field_ref' ref='customer:last_name' />
+          <argument key='value' type='random_value_provider[Enum]'>
+            <argument key='probability' type='function_ref' ref='Pr[request.last_name]' />
+          </argument>
+        </setter>
+        <setter key='set_age' type='field_setter'>
+          <argument key='field' type='field_ref' ref='customer:age' />
+          <argument key='value' type='random_value_provider[I16u]'>
+            <argument key='probability' type='function_ref' ref='Pr[request.age]' />
+          </argument>
+        </setter>
+      </setter_chain>
+      -->
+      <cardinality_estimator type="linear_scale_estimator">
+        <argument key="base_cardinality" type="I64u" value="%request.sequence.base_cardinality%" />
+      </cardinality_estimator>
+      <sequence_iterator type="partitioned_iterator" />
+    </random_sequence>
+  </record_sequences>
+</generator_prototype>
+

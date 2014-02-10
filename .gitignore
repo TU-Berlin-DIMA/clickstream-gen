@@ -1,6 +1,3 @@
-# ignore the machine-specific tpch-gen-frontend.xml file.
-src/config/tpch-gen-frontend.xml
-
 # ignore the soft link to the myriad assistant
 # myriad-assistant
 
