@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+<generator-config>
+
+  <!-- configurable parameters -->
+  <parameters>
+    <parameter name="request.output-file">clickstream</parameter>
+    <parameter name="session.timespan.min-date">2012-01-01 00:00:00</parameter>
+    <parameter name="session.timespan.max-date">2012-04-10 00:00:00</parameter>
+    <parameter name="session.timespan.pattern.probability">Pr[session.density]</parameter>
+    <parameter name="session.timespan.pattern.period">86400</parameter>
+  </parameters>
+  
+  <!-- partitioning configuration -->
+  <partitioning>
+    <partition type="product" method="fixed">
+      <cardinality>5000</cardinality>
+    </partition>
+    <partition type="user" method="fixed">
+      <cardinality>20000000</cardinality>
+    </partition>
+    <partition type="session" method="period-bound">
+      <period-min>${session.timespan.min-date}</period-min>
+      <period-max>${session.timespan.max-date}</period-max>
+      <items-per-second>1</items-per-second>
+    </partition>
+    <partition type="request" method="nested">
+      <parent>session</parent>
+      <items-per-parent>20</items-per-parent>
+    </partition>
+  </partitioning>
+  
+  <!-- function configuration -->
+  <functions>
+    <function key="Pr[product.category]" type="custom_discrete_probability">
+      <probability argument="0" value='0.10' /> <!-- PC_COMPUTER -->
+      <probability argument="1" value='0.10' /> <!-- PC_TV_SAT -->
+      <probability argument="2" value='0.10' /> <!-- PC_HIFI -->
+      <probability argument="3" value='0.10' /> <!-- PC_FOTO_VIDEO -->
+      <probability argument="4" value='0.10' /> <!-- PC_MOBILE -->
+      <probability argument="5" value='0.10' /> <!-- PC_MUSIC -->
+      <probability argument="6" value='0.10' /> <!-- PC_DVD_BLURAY -->
+      <probability argument="7" value='0.10' /> <!-- PC_GAMES_CONSOLES -->
+      <probability argument="8" value='0.10' /> <!-- PC_SOFTWARE -->
+      <probability argument="9" value='0.10' /> <!-- PC_SPECIAL_OFFERS -->
+    </function>
+    <function key="Pr[session.primary_category]" type="custom_discrete_probability">
+      <probability argument="0" value='0.20' /> <!-- PC -->
+      <probability argument="1" value='0.05' /> <!-- TV_SAT -->
+      <probability argument="2" value='0.10' /> <!-- HIFI -->
+      <probability argument="3" value='0.02' /> <!-- FOTO_VIDEO -->
+      <probability argument="4" value='0.15' /> <!-- MOBILE -->
+      <probability argument="5" value='0.08' /> <!-- MUSIC -->
+      <probability argument="6" value='0.10' /> <!-- DVD_BLURAY -->
+      <probability argument="7" value='0.12' /> <!-- GAMES_CONSOLES -->
+      <probability argument="8" value='0.15' /> <!-- SOFTWARE -->
+      <probability argument="9" value='0.03' /> <!-- OTHER -->
+    </function>
+    <function key="Pr[request.product_category]" type="custom_discrete_probability">
+      <probability argument="0" value='0.10' /> <!-- PC -->
+      <probability argument="1" value='0.10' /> <!-- TV_SAT -->
+      <probability argument="2" value='0.10' /> <!-- HIFI -->
+      <probability argument="3" value='0.10' /> <!-- FOTO_VIDEO -->
+      <probability argument="4" value='0.10' /> <!-- MOBILE -->
+      <probability argument="5" value='0.10' /> <!-- MUSIC -->
+      <probability argument="6" value='0.10' /> <!-- DVD_BLURAY -->
+      <probability argument="7" value='0.10' /> <!-- GAMES_CONSOLES -->
+      <probability argument="8" value='0.10' /> <!-- SOFTWARE -->
+      <probability argument="9" value='0.10' /> <!-- OTHER -->
+    </function>
+    <function key="Pr[request.product]" type="normal_probability">
+      <argument key="mean">0</argument>
+      <argument key="stddev">5</argument>
+    </function>
+    <function key="Pr[request.server]" type="custom_discrete_probability" />
+    <function key="Pr[session.type]" type="custom_discrete_probability">
+      <probability argument="0" value='0.80' /> <!-- ST_BROWSE probability -->
+      <probability argument="1" value='0.03' /> <!-- ST_PURCHASE_ABORT probability -->
+      <probability argument="2" value='0.17' /> <!-- ST_PURCHASE_SUBMIT probability -->
+    </function>
+    <function key="Pr[session.density]" type="normal_probability">
+      <argument key="mean">0</argument>
+      <argument key="stddev">5</argument>
+    </function>
+    <function key="Pr[session.number_of_requests]" type="normal_probability">
+      <argument key="mean">8</argument>
+      <argument key="stddev">2</argument>
+    </function>
+  </functions>
+  
+  <!-- string sets -->
+  <string-sets>
+    <!-- male first names -->
+    <string_set key="web_servers">
+      <item value="srv001">
+        <probability function="Pr[request.server]" value='0.07' />
+      </item>
+      <item value="srv002">
+        <probability function="Pr[request.server]" value='0.1' />
+      </item>
+      <item value="srv003">
+        <probability function="Pr[request.server]" value='0.09' />
+      </item>
+      <item value="srv004">
+        <probability function="Pr[request.server]" value='0.1' />
+      </item>
+      <item value="srv005">
+        <probability function="Pr[request.server]" value='0.11' />
+      </item>
+      <item value="srv006">
+        <probability function="Pr[request.server]" value='0.13' />
+      </item>
+      <item value="srv007">
+        <probability function="Pr[request.server]" value='0.12' />
+      </item>
+      <item value="srv008">
+        <probability function="Pr[request.server]" value='0.1' />
+      </item>
+      <item value="srv009">
+        <probability function="Pr[request.server]" value='0.08' />
+      </item>
+      <item value="srv010">
+        <probability function="Pr[request.server]" value='0.1' />
+      </item>
+    </string_set>
+  </string-sets>
+
+</generator-config>
