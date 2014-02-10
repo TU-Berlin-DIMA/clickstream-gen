@@ -1,0 +1,3 @@
+[submodule "vendor/myriad-toolkit"]
+	path = vendor/myriad
+	url = git://github.com/TU-Berlin-DIMA/myriad-toolkit.git
