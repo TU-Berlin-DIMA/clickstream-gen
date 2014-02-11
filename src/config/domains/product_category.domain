@@ -1,0 +1,11 @@
+@numberofvalues = 10
+0 ...... "COMPUTER"
+1 ...... "TV_SAT"
+2 ...... "HIFI"
+3 ...... "FOTO_VIDEO"
+4 ...... "MOBILE"
+5 ...... "MUSIC"
+6 ...... "DVD_BLURAY"
+7 ...... "GAMES_CONSOLES"
+8 ...... "SOFTWARE"
+9 ...... "SPECIAL_OFFERS"

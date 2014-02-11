@@ -1,0 +1,6 @@
+@numberofvalues = 5
+0 ...... "BROWSE"
+1 ...... "ADD_TO_CART"
+2 ...... "PURCHASE"
+3 ...... "PURCHASE_SUBMIT"
+4 ...... "PURCHASE_ABORT"

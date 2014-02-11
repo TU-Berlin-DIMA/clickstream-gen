@@ -1,50 +1,133 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<generator_prototype xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.dima.tu-berlin.de/myriad/prototype">
+<?xml version='1.0' encoding='UTF-8'?>
+<generator_prototype xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns='http://www.dima.tu-berlin.de/myriad/prototype'>
 
   <!-- configurable parameters -->
   <parameters>
-    <!-- naming convention {generator_name}.{parameter_name} -->
-    <parameter key="request.sequence.base_cardinality">1000</parameter>
+    <parameter key='user.sequence.cardinality'>20000000</parameter>
+    <parameter key='product.sequence.cardinality'>5000</parameter>
+    <parameter key='session.timespan.min-date'>2012-01-01 00:00:00</parameter>
+    <parameter key='session.timespan.max-date'>2012-04-10 00:00:00</parameter>
+    <parameter key='session.timespan.pattern.probability'>Pr[session.density]</parameter>
+    <parameter key='session.timespan.pattern.period'>86400</parameter>
   </parameters>
 
   <!-- function configuration -->
   <functions>
-    <!-- example: Pr[request.*] -->
-    <function key='Pr[request.pk]' type='uniform_probability[I64u]'>
-      <argument key='x_min' type='I64u' value='1' />
-      <argument key='x_max' type='I64u' value='${%request.sequence.cardinality% + 1}' />
+    <!-- user -->
+    <function key='Pr[user.ip_address]' type='uniform_probability[I32u]'>
+      <argument key='x_min' type='Enum' value='3221225473' />
+      <argument key='x_max' type='Enum' value='3758096383' />
     </function>
-    <function key='Pr[request.gender]' type='combined_probability[Enum]'>
-      <argument key='path' type='String' value='${%ENV.config-dir% + "/distributions/core/demographics/gender.distribution"}' />
+    
+    <!-- product -->
+    <function key='Pr[product.category]' type='combined_probability[Enum]'>
+      <argument key='path' type='String' value='${%ENV.config-dir% + "/distributions/product/category.distribution"}' />
     </function>
-    <function key='Pr[request.first_name]' type='conditional_combined_probability[Enum;Enum]'>
-      <argument key='path' type='String' value='${%ENV.config-dir% + "/distributions/core/demographics/first_name.distribution"}' />
+
+    <!-- session -->
+    <function key='Pr[session.primary_category]' type='combined_probability[Enum]'>
+      <argument key='path' type='String' value='${%ENV.config-dir% + "/distributions/session/primary_category.distribution"}' />
     </function>
-    <function key='Pr[request.last_name]' type='combined_probability[Enum]'>
-      <argument key='path' type='String' value='${%ENV.config-dir% + "/distributions/core/demographics/last_name.distribution"}' />
+    <function key='Pr[session.type]' type='combined_probability[Enum]'>
+      <argument key='path' type='String' value='${%ENV.config-dir% + "/distributions/session/type.distribution"}' />
     </function>
-    <function key='Pr[request.age]' type='normal_probability[Decimal]'>
-      <argument key='mean' type='Decimal' value='48' />
-      <argument key='stddev' type='Decimal' value='12' />
+    <function key='Pr[session.density]' type='normal_probability[I32u]'>
+      <argument key='mean' type='I32u' value='0' />
+      <argument key='stddev' type='I32u' value='5' />
+    </function>
+    <function key='Pr[session.number_of_requests]' type='normal_probability[I32u]'>
+      <argument key='mean' type='I32u' value='8' />
+      <argument key='stddev' type='I32u' value='2' />
+    </function>
+
+    <!-- request -->
+    <function key='Pr[request.product_category]' type='combined_probability[Enum]'>
+      <argument key='path' type='String' value='${%ENV.config-dir% + "/distributions/request/product_category.distribution"}' />
+    </function>
+    <function key='Pr[request.product]' type='normal_probability[I32u]'>
+      <argument key='mean' type='I32u' value='0' />
+      <argument key='stddev' type='I32u' value='5' />
+    </function>
+    <function key='Pr[request.server]' type='uniform_probability[Enum]'>
+      <argument key='x_min' type='Enum' value='0' />
+      <argument key='x_max' type='Enum' value='11' />
     </function>
   </functions>
 
   <!-- enumeration types -->
   <enum_sets>
-    <!-- example: demographics.* -->
-    <enum_set key='demographics.gender'>
-      <argument key='path' type='String' value='${%ENV.config-dir% + "/domains/core/demographics/gender.domain"}' />
+    <!-- product -->
+    <enum_set key='product.category'>
+      <argument key='path' type='String' value='${%ENV.config-dir% + "/domains/product_category.domain"}' />
     </enum_set>
-    <enum_set key='demographics.first_name'>
-      <argument key='path' type='String' value='${%ENV.config-dir% + "/domains/core/demographics/first_name.domain"}' />
+
+    <!-- request -->
+    <enum_set key='request.type'>
+      <argument key='path' type='String' value='${%ENV.config-dir% + "/domains/request_type.domain"}' />
     </enum_set>
-    <enum_set key='demographics.last_name'>
-      <argument key='path' type='String' value='${%ENV.config-dir% + "/domains/core/demographics/last_name.domain"}' />
+    <enum_set key='request.method'>
+      <argument key='path' type='String' value='${%ENV.config-dir% + "/domains/request_method.domain"}' />
     </enum_set>
   </enum_sets>
 
   <record_sequences>
-    <random_sequence key="request">
+    <!-- user -->
+    <random_sequence key='user'>
+      <record_type>
+        <field name='pk' type='I64u' />
+        <field name='ip_address' type='I32u' />
+      </record_type>
+      <output_format type='csv'>
+        <argument key='delimiter' type='Char' value='|' />
+        <argument key='field' type='field_ref' ref='user:pk' />
+        <argument key='field' type='field_ref' ref='user:ip_address' />
+      </output_format>
+      <setter_chain>
+        <setter key='set_pk' type='field_setter'>
+          <argument key='field' type='field_ref' ref='user:pk' />
+          <argument key='value' type='clustered_value_provider[I64u]'>
+            <argument key='probability' type='function_ref' ref='Pr[request.pk]' />
+            <argument key='cardinality' type='const_range_provider[I64u]'>
+              <argument key='min' type='I64u' value='1' />
+              <argument key='max' type='I64u' value='${%user.sequence.cardinality% + 1}' />
+            </argument>
+          </argument>
+        </setter>
+        <setter key='set_ip_address' type='field_setter'>
+          <argument key='field' type='field_ref' ref='user:ip_address' />
+          <argument key='value' type='random_value_provider[I32u]'>
+            <argument key='probability' type='function_ref' ref='Pr[user.ip_address]' />
+          </argument>
+        </setter>
+      </setter_chain>
+      <cardinality_estimator type='const_estimator'>
+        <argument key='cardinality' type='I64u' value='%user.sequence.cardinality%' />
+      </cardinality_estimator>
+      <sequence_iterator type='partitioned_iterator' />
+    </random_sequence>
+
+    <!-- session -->
+    <random_sequence key='session'>
+      <record_type>
+        <field name='pk' type='I64u' />
+        <field name='type' type='I32u' />
+        <field name='number_of_requests' type='I32u' />
+        <field name='session_start' type='I32u' />
+        <field name='primary_product_category' type='Enum' enumref='product.category' />
+        <reference name='user' type='user' />
+      </record_type>
+      <output_format type='csv'>
+        <argument key='delimiter' type='Char' value='|' />
+        <argument key='field' type='field_ref' ref='session:pk' />
+      </output_format>
+      <cardinality_estimator type='const_estimator'>
+        <argument key='cardinality' type='I64u' value='%user.sequence.cardinality%' />
+      </cardinality_estimator>
+      <sequence_iterator type='partitioned_iterator' />
+    </random_sequence>
+
+    <!-- request -->
+    <random_sequence key='request'>
       <record_type>
         <field name='position' type='I32u' />
         <field name='server' type='String' />
@@ -52,12 +135,12 @@
         <field name='method' type='Enum' enumref='request.method' />
         <field name='timestamp' type='Date' />
         <field name='browseCount' type='I16u' />
-        <field name='productCategory' type='Enum' enumref='product.category' />
-        <field name='productInterval' type='Enum' enumref='product.category' />
+        <field name='product_category' type='Enum' enumref='product.category' />
+        <field name='product_interval' type='Enum' enumref='product.category' />
         <reference name='product' type='product' />
         <reference name='session' type='session' />
       </record_type>
-      <output_format type="csv">
+      <output_format type='csv'>
         <argument key='delimiter' type='Char' value='|' />
         <argument key='field' type='field_ref' ref='request:server' />
         <argument key='field' type='field_ref' ref='request:type' />
@@ -102,10 +185,10 @@
         </setter>
       </setter_chain>
       -->
-      <cardinality_estimator type="linear_scale_estimator">
-        <argument key="base_cardinality" type="I64u" value="%request.sequence.base_cardinality%" />
+      <cardinality_estimator type='linear_scale_estimator'>
+        <argument key='base_cardinality' type='I64u' value='%request.sequence.base_cardinality%' />
       </cardinality_estimator>
-      <sequence_iterator type="partitioned_iterator" />
+      <sequence_iterator type='partitioned_iterator' />
     </random_sequence>
   </record_sequences>
 </generator_prototype>

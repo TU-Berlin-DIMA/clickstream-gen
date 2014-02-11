@@ -1,0 +1,6 @@
+@numberofexactvals = 3
+@numberofbins = 0
+@nullprobability = 0.0
+p(X) = 0.80                      for X = { 0 }
+p(X) = 0.03                      for X = { 1 }
+p(X) = 0.17                      for X = { 2 }
