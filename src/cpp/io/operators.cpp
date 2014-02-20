@@ -27,11 +27,19 @@ namespace Myriad {
 
 OutputCollector::StreamType& operator<<(OutputCollector::StreamType& out, const ClickStreamGen::Product& record)
 {
-	return out;
+    return out;
 }
 
 OutputCollector::StreamType& operator<<(OutputCollector::StreamType& out, const ClickStreamGen::Session& record)
 {
+    I32u ipAddress = record.user()->ipAddress();
+
+    out << toString((ipAddress >> 24) & 0xff) << "."
+        << toString((ipAddress >> 16) & 0xff) << "."
+        << toString((ipAddress >> 8 ) & 0xff) << "."
+        << toString((ipAddress >> 0 ) & 0xff) << " "
+        << record.user()->key()               << "\n";;
+
 	return out;
 }
 
@@ -80,9 +88,15 @@ OutputCollector::StreamType& operator<<(OutputCollector::StreamType& out, const 
 
 OutputCollector::StreamType& operator<<(OutputCollector::StreamType& out, const ClickStreamGen::User& record)
 {
-	// TODO: serialize the record into the output stream
-	
-	return out;
+    out << record.key() << " ";
+    I32u ipAddress = record.ipAddress();
+
+    out << toString((ipAddress >> 24) & 0xff) << "."
+        << toString((ipAddress >> 16) & 0xff) << "."
+        << toString((ipAddress >> 8 ) & 0xff) << "."
+        << toString((ipAddress >> 0 ) & 0xff) << "\n";
+
+    return out;
 }
 
 }  // namespace Myriad

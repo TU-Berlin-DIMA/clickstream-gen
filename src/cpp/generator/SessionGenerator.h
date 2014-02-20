@@ -49,7 +49,7 @@ public:
 
 		if (stage.name() == "default")
 		{
-			registerTask(new RandomSetTimeSpanGeneratingTask<Session, NormalPrFunction> (*this, _config, &Session::sessionStart, true));
+			registerTask(new RandomSetTimeSpanGeneratingTask<Session, NormalPrFunction> (*this, _config, &Session::sessionStart, false));
 		}
 	}
 
@@ -135,6 +135,7 @@ public:
 		}
 
 		AutoPtr<User> user = new User();
+		user->key(_random(1, (I32) _userCardinality));
 		user->ipAddress(_random(_ipAddressMin, _ipAddressMax)); // sample a class C ip address
 		recordPtr->user(user);
 //		recordPtr->user(const_cast<RandomSetInspector<User>& >(_userInspector).at(_random(0, _userCardinality)));

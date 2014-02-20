@@ -16,7 +16,7 @@
       <cardinality>5000</cardinality>
     </partition>
     <partition type="user" method="fixed">
-      <cardinality>20000000</cardinality>
+      <cardinality>2000</cardinality>
     </partition>
     <partition type="session" method="period-bound">
       <period-min>${session.timespan.min-date}</period-min>

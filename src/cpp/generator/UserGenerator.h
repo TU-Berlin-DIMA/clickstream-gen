@@ -45,6 +45,11 @@ public:
 	{
 		// call generator implementation
 		RandomSetGenerator<User>::prepare(stage, pool);
+
+        if (stage.name() == "default")
+        {
+            registerTask(new RandomSetDefaultGeneratingTask<User>(*this, _config, false));
+        }
 	}
 
 	HydratorChainType hydratorChain(BaseHydratorChain::OperationMode opMode, RandomStream& random);
@@ -79,7 +84,7 @@ public:
 		ensurePosition(recordPtr->genID());
 
 		// apply hydrators
-//		_hydrateKey(recordPtr);
+		recordPtr->key(recordPtr->genID()+1);
 		recordPtr->ipAddress(_random(3221225473U, 3758096383U)); // sample a class C ip address
 	}
 
